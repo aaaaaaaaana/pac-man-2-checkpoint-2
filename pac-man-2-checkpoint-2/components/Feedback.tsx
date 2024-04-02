@@ -1,97 +1,125 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, ScrollView, SafeAreaView } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialIcons } from '@expo/vector-icons';
-
-import Header from './Header'
-import Footer from './Footer'
-import Menu from './Menu'
-
-
-
-export default function Feedback({ navigation } ) {
-
-
-
+ 
+import Header from './Header';
+import Footer from './Footer';
+ 
+ 
+ 
+export default function FeedbackPage() {
+ 
   const [name, setName] = useState('');
+ 
   const [comment, setComment] = useState('');
+ 
   const [feedbacks, setFeedbacks] = useState([]);
-
-
-
-
-
+ 
+ 
+ 
+  useEffect(() => {
+    loadFeedbacks();
+  }, []);
+ 
+ 
+  const loadFeedbacks = async () => {
+ 
+    try {
+ 
+      const storedFeedbacks = await AsyncStorage.getItem('feedbacks');
+ 
+      if (storedFeedbacks !== null) {
+        setFeedbacks(JSON.parse(storedFeedbacks));
+      }
+ 
+    } catch (error) {
+      console.error('Error loading feedbacks', error);
+    }
+ 
+  };
+ 
+ 
+ 
+  const saveFeedbacks = async (updatedFeedbacks) => {
+ 
+    try {
+ 
+      await AsyncStorage.setItem('feedbacks', JSON.stringify(updatedFeedbacks));
+    } catch (error) {
+      console.error('Error saving feedbacks', error);
+    }
+ 
+  };
+ 
+ 
+ 
   const handlePublish = () => {
-
-
+ 
     if (name.trim() === '' || comment.trim() === '') {
       return;
     }
-
-
-
-    setFeedbacks([...feedbacks, { author: name, comment }]);
+ 
+ 
+ 
+    const updatedFeedbacks = [...feedbacks, { author: name, comment }];
+    setFeedbacks(updatedFeedbacks);
+    saveFeedbacks(updatedFeedbacks);
     setName('');
     setComment('');
-
-
   };
-
-
-
-
-
-  const handleDelete = (index) => {
-
-
+ 
+ 
+ 
+ 
+  const handleDelete = async (index) => {
+ 
+ 
     const updatedFeedbacks = [...feedbacks];
     updatedFeedbacks.splice(index, 1);
     setFeedbacks(updatedFeedbacks);
-
-
+    saveFeedbacks(updatedFeedbacks);
+ 
   };
-
-
-
-
-
-
+ 
+ 
+ 
+ 
   return (
-
-
-    <SafeAreaView style={style.containerBackground}>
-
-      <Header navigation={navigation} />
-      
-      
-    
+ 
+ 
+    <SafeAreaView style={styles.containerBackground}>
+ 
+ 
+      <Header />
+ 
+ 
       <ScrollView>
-
-        <View style={style.container}>
-
-
-          <Text style={style.titulo}> Deixe seu comentário!! </Text>
-
-
-          <View style={style.feedbackContainer}>
-
-
-            <Text style={style.identificador}>Nome: </Text>
-
-
+ 
+        <View style={styles.container}>
+ 
+          <Text style={styles.title}> Deixe seu comentário!! </Text>
+ 
+          <View style={styles.feedbackContainer}>
+ 
+            <Text style={styles.title2}>Nome: </Text>
+ 
+ 
             <TextInput
-              style={[style.input, style.inputComentario]}
+              style={[styles.input, styles.commentInput]}
               placeholder="Nome"
               value={name}
               onChangeText={text => setName(text)}
               fontSize={15}
             />
-
-
-            <Text style={style.identificador}>Comentário: </Text>
-
-
+ 
+ 
+ 
+ 
+            <Text style={styles.title2}>Comentário: </Text>
+           
             <TextInput
-              style={[style.input, style.inputComentario]}
+              style={[styles.input, styles.commentInput]}
               placeholder=""
               multiline
               value={comment}
@@ -99,98 +127,88 @@ export default function Feedback({ navigation } ) {
               fontSize={15}
               color={'white'}
             />
-
-
-
+ 
+ 
+ 
             <TouchableOpacity
-              style={style.botaoPublicar}
+              style={styles.publishButton}
               onPress={handlePublish}
             >
-
-
-              <Text style={style.textoPublicar}> Comentar </Text>
-
-
+ 
+              <Text style={styles.publishButtonText}> Comentar </Text>
+ 
             </TouchableOpacity>
-
-
+ 
+ 
+ 
           </View>
-
-
-
-
-
-          <ScrollView style={style.feedbackLista}>
-
-
+         
+ 
+         
+          <ScrollView style={styles.feedbackList}>
             {feedbacks.map((feedback, index) => (
-
-
-              <View key={index} style={style.feedbackItem}>
-
-
+ 
+              <View key={index} style={styles.feedbackItem}>
+ 
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-
-
-                  <Text style={[style.feedbackNome, { backgroundColor: '#000000' }]}>Nome: {feedback.author}</Text>
-
-
-
-                  <TouchableOpacity onPress={() => handleDelete(index)}>
-
-
+ 
+                  <Text
+                    style={[styles.feedbackName,
+                    { backgroundColor: '#000000' }]}>Nome: {feedback.author}
+ 
+                  </Text>
+ 
+ 
+                  <TouchableOpacity
+                    onPress={() => handleDelete(index)}
+                  >
+ 
                     <MaterialIcons name="delete" size={24} color="red" />
-
-
+ 
                   </TouchableOpacity>
-
-
-
+ 
+ 
                 </View>
-
-
-
-                <Text style={[style.feedbackCommentario, { backgroundColor: '#000000' }]}>Comentário: {feedback.comment}</Text>
-
-
-
+ 
+                <Text
+                  style={[styles.feedbackComment,
+                  { backgroundColor: '#000000' }]}>Comentário: {feedback.comment}
+                </Text>
+ 
+ 
               </View>
-
-
+ 
             ))}
-
-
+ 
           </ScrollView>
-
-      </View>
-
-    </ScrollView>
-
-    <Footer/>
-
-  </SafeAreaView>
-
+ 
+        </View>
+ 
+      </ScrollView>
+ 
+      <Footer />
+ 
+ 
+    </SafeAreaView>
+ 
   );
 }
-
-
-
-
-
-
-const style = StyleSheet.create({
-
-
-
+ 
+ 
+ 
+ 
+const styles = StyleSheet.create({
+ 
+ 
+ 
   containerBackground: {
     flex: 1,
     backgroundColor: '#FFDF00',
     marginTop: 25,
-
-
   },
-
-  
+ 
+ 
+ 
   container: {
     flex: 1,
     paddingHorizontal: 20,
@@ -200,35 +218,31 @@ const style = StyleSheet.create({
     justifyContent: 'center',
     width: '90%',
     marginTop: 60,
-    left: 20
-    
+    left: 20,
   },
-
-
-
-
-
-  titulo: {
+ 
+ 
+ 
+  title: {
     color: '#000000',
     fontSize: 26,
     fontFamily: 'Minecraft',
     marginBottom: 20,
     marginLeft: 20,
   },
-
-
-    identificador: {
+ 
+ 
+ 
+  title2: {
     color: '#ffffff',
     fontSize: 18,
     fontFamily: 'Minecraft',
     marginBottom: 15,
     marginTop: 15,
   },
-
-
-
-
-
+ 
+ 
+ 
   feedbackContainer: {
     borderWidth: 6,
     borderColor: '#001E97',
@@ -237,11 +251,10 @@ const style = StyleSheet.create({
     marginBottom: 20,
     backgroundColor: '#000000',
   },
-
-
-
-
-
+ 
+ 
+ 
+ 
   input: {
     width: '100%',
     height: 40,
@@ -253,85 +266,64 @@ const style = StyleSheet.create({
     fontFamily: 'Minecraft',
     backgroundColor: '#000000',
   },
-
-
-
-
-
-  inputComentario: {
+ 
+ 
+ 
+  commentInput: {
     height: 100,
-    color: 'white'
+    color: 'white',
   },
-
-
-
-  botaoPublicar: {
+ 
+ 
+ 
+  publishButton: {
     backgroundColor: '#001E97',
     padding: 10,
     borderRadius: 10,
     alignItems: 'center',
     marginTop: 10,
   },
-
-
-
-
-
-  textoPublicar: {
+ 
+ 
+ 
+  publishButtonText: {
     color: 'white',
     fontFamily: 'Minecraft',
-
-
   },
-
-
-
-  feedbackLista: {
+ 
+ 
+ 
+  feedbackList: {
     flex: 1,
   },
-
-
-
-
-
+ 
+ 
+ 
   feedbackItem: {
     marginBottom: 40,
     padding: 20,
     borderWidth: 5,
     borderColor: '#001E97',
     borderRadius: 10,
-    backgroundColor: '#000000'
-   
+    backgroundColor: '#000000',
   },
-
-
-
-
-
-  feedbackNome: {
-    fontFamily: 'Minecraft',
-    color: 'white',
-    marginBottom: 15,
-    marginTop: 15,
-  },
-
-
-
-  feedbackCommentario: {
+ 
+ 
+ 
+  feedbackName: {
     fontFamily: 'Minecraft',
     color: 'white',
     marginBottom: 15,
   },
-
-
-
-
-
+ 
+ 
+ 
+  feedbackComment: {
+    fontFamily: 'Minecraft',
+    color: 'white',
+    marginBottom: 15,
+  },
+ 
+ 
+ 
 });
-
-
-
-
-
-
-
