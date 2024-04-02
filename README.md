@@ -13,6 +13,10 @@ Um dos maiores jogos da história, surgiu com a ideia de atrair o público femin
 - Suporte a telas
 - Dafont
 - StyleSheet
+- Expo
+- React-Native
+- AsyncStrorage
+- React Navigation
 
 # 🖊 Pré-requisitos
 Para visualizar a seguinte aplicação, realize os seguintes passos:
